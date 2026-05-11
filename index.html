@@ -751,7 +751,19 @@ async function fetchGCalEvents(){
     );
     if(resp.status === 401){ handleTokenExpiry(); return; }
     const data = await resp.json();
-    gcalEvents = (data.items || []).map(function(e){
+    gcalEvents = (data.items || []).filter(function(e){
+      // Filter out auto-generated events: birthdays, reminders, holidays
+      const org = (e.organizer && e.organizer.email) || '';
+      if(org.includes('calendar.google.com')) return false;
+      if(org.includes('holiday@group.v.calendar.google.com')) return false;
+      if(e.eventType === 'birthday') return false;
+      if(e.eventType === 'reminder') return false;
+      // Filter out all-day birthday events (transparent = show as free)
+      const title = (e.summary || '').toLowerCase();
+      if(!e.start.dateTime && title.includes("'s birthday")) return false;
+      if(!e.start.dateTime && e.transparency === 'transparent' && title.includes('birthday')) return false;
+      return true;
+    }).map(function(e){
       return {
         id: e.id,
         title: e.summary || '(No title)',
@@ -1338,7 +1350,6 @@ function openSync(){
   b.textContent=lastSync?'Synced':'Ready';
   b.className='sync-badge '+(lastSync?'ok':'pending');
   document.getElementById('sync-last').textContent=lastSync||'Never';
-  // Show/hide the "connect first" note
   const note=document.getElementById('sync-auth-note');
   if(note) note.style.display=gcalConnected?'none':'block';
   const syncBtn=document.getElementById('sync-now-btn');
@@ -1352,12 +1363,10 @@ async function doSync(){
     toast('Connect Google Calendar first — tap Connect Cal in the top bar');
     return;
   }
-  // Update UI to syncing state
   const b=document.getElementById('sync-badge');
   b.textContent='Syncing...'; b.className='sync-badge pending';
   const syncBtn=document.getElementById('sync-now-btn');
   if(syncBtn){ syncBtn.disabled=true; syncBtn.textContent='⏳ Syncing...'; }
-
   try {
     await syncTodos();
     await syncSchedule();
@@ -1383,13 +1392,10 @@ async function doSync(){
 }
 
 async function sheetsRequest(range, values){
-  // Clear then write to avoid stale rows
   const base = 'https://sheets.googleapis.com/v4/spreadsheets/' + SHEET_ID;
   const headers = { 'Authorization': 'Bearer ' + gcalToken, 'Content-Type': 'application/json' };
-  // Clear range first
   await fetch(base + '/values/' + encodeURIComponent(range) + ':clear',
     { method:'POST', headers });
-  // Write new data
   const resp = await fetch(
     base + '/values/' + encodeURIComponent(range) + '?valueInputOption=USER_ENTERED',
     { method:'PUT', headers, body: JSON.stringify({ range, values }) }
@@ -1400,35 +1406,21 @@ async function sheetsRequest(range, values){
 }
 
 async function syncTodos(){
-  const rows = [['ID','Date','Task','Tag','Priority','State','PostponedTo','Notes','CarryFrom','LastUpdated']];
-  const now = new Date().toISOString();
-  todos.forEach(function(t){
-    rows.push([
-      t.id||'', t.date||'', t.task||'', t.tag||'', t.priority||'Normal',
-      t.state||'open', t.postponedTo||'', t.notes||'', t.carryFrom||'', now
-    ]);
-  });
+  const rows=[['ID','Date','Task','Tag','Priority','State','PostponedTo','Notes','CarryFrom','LastUpdated']];
+  const now=new Date().toISOString();
+  todos.forEach(function(t){ rows.push([t.id||'',t.date||'',t.task||'',t.tag||'',t.priority||'Normal',t.state||'open',t.postponedTo||'',t.notes||'',t.carryFrom||'',now]); });
   await sheetsRequest('SC-Todos!A1:J'+(rows.length+1), rows);
 }
-
 async function syncSchedule(){
-  const rows = [['Date','Time','Category','Title','Editable','LastUpdated']];
-  const now = new Date().toISOString();
-  schedule.forEach(function(b){
-    rows.push([b.date||'', b.time||'', b.cat||'', b.title||'', b.editable?'TRUE':'FALSE', now]);
-  });
+  const rows=[['Date','Time','Category','Title','Editable','LastUpdated']];
+  const now=new Date().toISOString();
+  schedule.forEach(function(b){ rows.push([b.date||'',b.time||'',b.cat||'',b.title||'',b.editable?'TRUE':'FALSE',now]); });
   await sheetsRequest('SC-Schedule!A1:F'+(rows.length+1), rows);
 }
-
 async function syncAppointments(){
-  const rows = [['ID','Date','Title','Type','Start','End','Guests','Notes','GCalEventID','LastUpdated']];
-  const now = new Date().toISOString();
-  appts.forEach(function(a){
-    rows.push([
-      a.id||'', a.date||'', a.title||'', a.type||'', a.start||'', a.end||'',
-      a.guests||'', a.notes||'', a.gcalEventId||'', now
-    ]);
-  });
+  const rows=[['ID','Date','Title','Type','Start','End','Guests','Notes','GCalEventID','LastUpdated']];
+  const now=new Date().toISOString();
+  appts.forEach(function(a){ rows.push([a.id||'',a.date||'',a.title||'',a.type||'',a.start||'',a.end||'',a.guests||'',a.notes||'',a.gcalEventId||'',now]); });
   await sheetsRequest('SC-Appointments!A1:J'+(rows.length+1), rows);
 }
 
