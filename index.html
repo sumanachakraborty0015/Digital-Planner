@@ -735,55 +735,37 @@ function setGCalConnected(val){
   if(bar) bar.style.display = val ? 'flex' : 'none';
 }
 
-/* FETCH EVENTS FROM GOOGLE CALENDAR - all visible calendars */
+/* FETCH EVENTS FROM GOOGLE CALENDAR */
 async function fetchGCalEvents(){
   if(!gcalToken) return;
   const now = new Date();
   const tMin = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString();
   const tMax = new Date(now.getFullYear(), now.getMonth()+3, 0).toISOString();
   try {
-    // Get all calendars the user has visible (selected = shown in Google Cal)
-    const listResp = await fetch(
-      'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader',
+    // Fetch primary calendar only with eventTypes=default
+    // This excludes Google-injected birthday and reminder events
+    const resp = await fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events' +
+      '?timeMin=' + encodeURIComponent(tMin) +
+      '&timeMax=' + encodeURIComponent(tMax) +
+      '&singleEvents=true&orderBy=startTime&maxResults=500' +
+      '&eventTypes=default',
       { headers: { 'Authorization': 'Bearer ' + gcalToken } }
     );
-    if(listResp.status === 401){ handleTokenExpiry(); return; }
-    const listData = await listResp.json();
-    const visibleCals = (listData.items || []).filter(function(c){ return c.selected !== false; });
-    // Fetch events from each visible calendar and merge
-    const allEvents = [];
-    await Promise.all(visibleCals.map(async function(cal){
-      try {
-        const calId = encodeURIComponent(cal.id);
-        const resp = await fetch(
-          'https://www.googleapis.com/calendar/v3/calendars/' + calId + '/events' +
-          '?timeMin=' + encodeURIComponent(tMin) +
-          '&timeMax=' + encodeURIComponent(tMax) +
-          '&singleEvents=true&orderBy=startTime&maxResults=500',
-          { headers: { 'Authorization': 'Bearer ' + gcalToken } }
-        );
-        if(!resp.ok) return;
-        const data = await resp.json();
-        (data.items || []).forEach(function(e){
-          allEvents.push({
-            id: e.id,
-            title: e.summary || '(No title)',
-            date: ((e.start && (e.start.dateTime || e.start.date)) || '').split('T')[0],
-            startTime: (e.start && e.start.dateTime) ? e.start.dateTime.split('T')[1].slice(0,5) : '',
-            endTime: (e.end && e.end.dateTime) ? e.end.dateTime.split('T')[1].slice(0,5) : '',
-            allDay: !(e.start && e.start.dateTime),
-            guests: (e.attendees||[]).map(function(a){ return a.email; }).join(', '),
-            notes: e.description || '',
-            gcalId: e.id,
-            calColor: cal.backgroundColor || null
-          });
-        });
-      } catch(ex){ /* skip calendars that error */ }
-    }));
-    // Deduplicate by event id
-    const seen = {};
-    gcalEvents = allEvents.filter(function(e){
-      if(seen[e.id]) return false; seen[e.id]=true; return true;
+    if(resp.status === 401){ handleTokenExpiry(); return; }
+    const data = await resp.json();
+    gcalEvents = (data.items || []).map(function(e){
+      return {
+        id: e.id,
+        title: e.summary || '(No title)',
+        date: ((e.start && (e.start.dateTime || e.start.date)) || '').split('T')[0],
+        startTime: (e.start && e.start.dateTime) ? e.start.dateTime.split('T')[1].slice(0,5) : '',
+        endTime: (e.end && e.end.dateTime) ? e.end.dateTime.split('T')[1].slice(0,5) : '',
+        allDay: !(e.start && e.start.dateTime),
+        guests: (e.attendees||[]).map(function(a){ return a.email; }).join(', '),
+        notes: e.description || '',
+        gcalId: e.id
+      };
     });
     const statusTxt = document.getElementById('gcal-status-text');
     if(statusTxt) statusTxt.textContent = gcalEvents.length + ' Google Calendar events loaded';
