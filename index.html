@@ -726,43 +726,28 @@ async function fetchGCalEvents(){
   const now = new Date();
   const tMin = new Date(now.getFullYear(), now.getMonth()-1, 1).toISOString();
   const tMax = new Date(now.getFullYear(), now.getMonth()+3, 0).toISOString();
-  const sources = [
-    { id: 'primary', filterBirthdays: true },
-    { id: 'en.usa#holiday@group.v.calendar.google.com', filterBirthdays: false },
-    { id: 'family07086560048161604504@group.calendar.google.com', filterBirthdays: false }
-  ];
   try {
-    const allEvents = [];
-    await Promise.all(sources.map(async function(src){
-      try {
-        const resp = await fetch(
-          'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(src.id) + '/events' +
-          '?timeMin=' + encodeURIComponent(tMin) +
-          '&timeMax=' + encodeURIComponent(tMax) +
-          '&singleEvents=true&orderBy=startTime&maxResults=500',
-          { headers: { 'Authorization': 'Bearer ' + gcalToken } }
-        );
-        if(!resp.ok) return;
-        const data = await resp.json();
-        (data.items || []).forEach(function(e){
-          if(src.filterBirthdays && e.eventType === 'birthday') return;
-          allEvents.push({
-            id: e.id,
-            title: e.summary || '(No title)',
-            date: ((e.start && (e.start.dateTime || e.start.date)) || '').split('T')[0],
-            startTime: (e.start && e.start.dateTime) ? e.start.dateTime.split('T')[1].slice(0,5) : '',
-            endTime: (e.end && e.end.dateTime) ? e.end.dateTime.split('T')[1].slice(0,5) : '',
-            allDay: !(e.start && e.start.dateTime),
-            guests: (e.attendees||[]).map(function(a){ return a.email; }).join(', '),
-            notes: e.description || '',
-            gcalId: e.id
-          });
-        });
-      } catch(ex){}
-    }));
-    const seen = {};
-    gcalEvents = allEvents.filter(function(e){
-      if(seen[e.id]) return false; seen[e.id]=true; return true;
+    const resp = await fetch(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events' +
+      '?timeMin=' + encodeURIComponent(tMin) +
+      '&timeMax=' + encodeURIComponent(tMax) +
+      '&singleEvents=true&orderBy=startTime&maxResults=500',
+      { headers: { 'Authorization': 'Bearer ' + gcalToken } }
+    );
+    if(resp.status === 401){ handleTokenExpiry(); return; }
+    const data = await resp.json();
+    gcalEvents = (data.items || []).map(function(e){
+      return {
+        id: e.id,
+        title: e.summary || '(No title)',
+        date: ((e.start && (e.start.dateTime || e.start.date)) || '').split('T')[0],
+        startTime: (e.start && e.start.dateTime) ? e.start.dateTime.split('T')[1].slice(0,5) : '',
+        endTime: (e.end && e.end.dateTime) ? e.end.dateTime.split('T')[1].slice(0,5) : '',
+        allDay: !(e.start && e.start.dateTime),
+        guests: (e.attendees||[]).map(function(a){ return a.email; }).join(', '),
+        notes: e.description || '',
+        gcalId: e.id
+      };
     });
     const statusTxt = document.getElementById('gcal-status-text');
     if(statusTxt) statusTxt.textContent = gcalEvents.length + ' Google Calendar events loaded';
