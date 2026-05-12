@@ -1506,13 +1506,12 @@ async function pullFromSheets(){
       return;
     }
 
-    // Overwrite state
+    // Overwrite state — Sheet is source of truth after a pull.
+    // Do NOT call mergeSeed() here: it would resurrect deleted seed blocks.
     todos    = pulledTodos;
     schedule = pulledSchedule;
     appts    = pulledAppts;
     // notes stays local — not in Sheets yet
-    // Re-merge seed todos that aren't already in pulled data (safety net)
-    mergeSeed();
 
     // Find highest numeric ID to prevent collisions
     const maxId = todos.concat(appts).reduce(function(mx, x){
