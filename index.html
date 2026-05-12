@@ -135,13 +135,12 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
 .tb.create .tb-ctag{background:var(--col-create-b);}
 .tb.life .tb-ctag{background:var(--col-life-b);}
 
-/* TB EDIT/DELETE ACTION BUTTONS */
-.tb-actions{display:flex;gap:4px;margin-top:5px;align-items:center;}
-.tb-action-btn{font-size:10px;padding:2px 8px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;line-height:1.5;}
-.tb-edit-btn{background:rgba(255,255,255,.6);color:var(--text2);}
-.tb-edit-btn:active{background:rgba(255,255,255,.9);}
-.tb-del-btn{background:rgba(224,48,48,.12);color:var(--col-urgent-b);}
-.tb-del-btn:active{background:rgba(224,48,48,.25);}
+/* TB EDIT/DELETE ICON BUTTONS — floated to top-right of block */
+.tb-actions{display:flex;gap:2px;align-items:center;margin-left:auto;flex-shrink:0;}
+.tb-action-btn{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;background:transparent;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;opacity:.45;transition:opacity .15s,background .15s;}
+.tb-action-btn:hover{opacity:1;}
+.tb-edit-btn:hover{background:rgba(255,255,255,.75);}
+.tb-del-btn:hover{background:rgba(224,48,48,.15);}
 
 /* INLINE EDIT FORM FOR TIME BLOCK */
 .tb-edit-form{background:var(--bg2);border:1px solid var(--ink-mid);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:.5rem;}
@@ -609,7 +608,12 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
 
 <script>
 /* ============================================================
-   SC_Digital_Planner_System - Phase 1 with Google Calendar OAuth
+   SC_Digital_Planner_System
+   Changes in this build:
+     #1 — All SEED_S blocks are editable:true (no locked blocks)
+     #2 — autoSyncBlock() writes SC-Schedule to Sheets immediately
+          after any edit or delete. Falls back to local-only with
+          dirty flag if Calendar is not connected.
    localStorage: sc-digital-planner
    Sheet: 12l31nhER2lOTUfcUm548sqvIUZydzdZk3pxL_iuIUoM
    ============================================================ */
@@ -813,6 +817,7 @@ function closeSetup(){ document.getElementById('setup-ov').classList.remove('ope
 
 /* ============================================================
    SEED DATA
+   ── #1: All blocks are editable:true — no locked blocks ──
    ============================================================ */
 const SEED_T=[
   {id:'s1',date:'2026-05-06',task:'Order YesStyle K-Sunscreen - deadline today',tag:'Urgent',priority:'Urgent',state:'open',postponedTo:'',notes:'',carryFrom:''},
@@ -852,61 +857,63 @@ const SEED_T=[
   {id:'s35',date:'2026-05-15',task:'Plan UGC study plan',tag:'Learn',priority:'Important',state:'open',postponedTo:'',notes:'June 2 start',carryFrom:''},
   {id:'s36',date:'2026-05-15',task:'Simplilearn session 6:30-9:30pm',tag:'Learn',priority:'Important',state:'open',postponedTo:'',notes:'Fixed',carryFrom:''},
 ];
+
+/* ── #1: every block is editable:true ── */
 const SEED_S=[
   {date:'2026-05-06',time:'09:00-13:00',cat:'work',title:'Part-time job',editable:true},
-  {date:'2026-05-06',time:'13:00-14:00',cat:'health',title:'Walk 1hr',editable:false},
-  {date:'2026-05-06',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:false},
-  {date:'2026-05-06',time:'16:00-16:30',cat:'home',title:'Water plants + repot 30min',editable:false},
-  {date:'2026-05-06',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:false},
+  {date:'2026-05-06',time:'13:00-14:00',cat:'health',title:'Walk 1hr',editable:true},
+  {date:'2026-05-06',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:true},
+  {date:'2026-05-06',time:'16:00-16:30',cat:'home',title:'Water plants + repot 30min',editable:true},
+  {date:'2026-05-06',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:true},
   {date:'2026-05-07',time:'09:00-13:00',cat:'work',title:'Part-time job',editable:true},
-  {date:'2026-05-07',time:'13:00-14:00',cat:'health',title:'Walk 1hr',editable:false},
-  {date:'2026-05-07',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:false},
-  {date:'2026-05-07',time:'16:00-16:30',cat:'home',title:'Repot plants 30min',editable:false},
-  {date:'2026-05-07',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:false},
-  {date:'2026-05-07',time:'18:30-21:30',cat:'learn',title:'Simplilearn session 3hrs',editable:false},
+  {date:'2026-05-07',time:'13:00-14:00',cat:'health',title:'Walk 1hr',editable:true},
+  {date:'2026-05-07',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:true},
+  {date:'2026-05-07',time:'16:00-16:30',cat:'home',title:'Repot plants 30min',editable:true},
+  {date:'2026-05-07',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:true},
+  {date:'2026-05-07',time:'18:30-21:30',cat:'learn',title:'Simplilearn session 3hrs',editable:true},
   {date:'2026-05-08',time:'09:00-13:00',cat:'work',title:'Part-time job',editable:true},
-  {date:'2026-05-08',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:false},
-  {date:'2026-05-08',time:'15:00-15:30',cat:'home',title:'Water plants + repot 30min',editable:false},
-  {date:'2026-05-08',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:false},
-  {date:'2026-05-09',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:false},
-  {date:'2026-05-09',time:'11:00-12:00',cat:'home',title:'Repot plants 30min',editable:false},
-  {date:'2026-05-10',time:'09:00-10:00',cat:'home',title:'Breakfast cook 1hr',editable:false},
-  {date:'2026-05-10',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:false},
-  {date:'2026-05-10',time:'11:00-11:30',cat:'home',title:'Water plants + repot 30min',editable:false},
+  {date:'2026-05-08',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:true},
+  {date:'2026-05-08',time:'15:00-15:30',cat:'home',title:'Water plants + repot 30min',editable:true},
+  {date:'2026-05-08',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:true},
+  {date:'2026-05-09',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:true},
+  {date:'2026-05-09',time:'11:00-12:00',cat:'home',title:'Repot plants 30min',editable:true},
+  {date:'2026-05-10',time:'09:00-10:00',cat:'home',title:'Breakfast cook 1hr',editable:true},
+  {date:'2026-05-10',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:true},
+  {date:'2026-05-10',time:'11:00-11:30',cat:'home',title:'Water plants + repot 30min',editable:true},
   {date:'2026-05-12',time:'09:00-13:00',cat:'work',title:'Part-time job',editable:true},
-  {date:'2026-05-12',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:false},
-  {date:'2026-05-12',time:'17:00-17:30',cat:'home',title:'Cook dinner 30min',editable:false},
-  {date:'2026-05-13',time:'08:00-09:00',cat:'health',title:'Walk 1hr',editable:false},
-  {date:'2026-05-13',time:'10:00-13:00',cat:'care',title:'Wax + hair pack',editable:false},
-  {date:'2026-05-13',time:'17:00-17:30',cat:'home',title:'Cook dinner 30min',editable:false},
-  {date:'2026-05-13',time:'18:30-21:30',cat:'learn',title:'Simplilearn session 3hrs',editable:false},
+  {date:'2026-05-12',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:true},
+  {date:'2026-05-12',time:'17:00-17:30',cat:'home',title:'Cook dinner 30min',editable:true},
+  {date:'2026-05-13',time:'08:00-09:00',cat:'health',title:'Walk 1hr',editable:true},
+  {date:'2026-05-13',time:'10:00-13:00',cat:'care',title:'Wax + hair pack',editable:true},
+  {date:'2026-05-13',time:'17:00-17:30',cat:'home',title:'Cook dinner 30min',editable:true},
+  {date:'2026-05-13',time:'18:30-21:30',cat:'learn',title:'Simplilearn session 3hrs',editable:true},
   {date:'2026-05-14',time:'09:00-13:00',cat:'work',title:'Part-time job',editable:true},
-  {date:'2026-05-14',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:false},
-  {date:'2026-05-14',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:false},
-  {date:'2026-05-14',time:'16:00-16:30',cat:'home',title:'Water plants + repot 30min',editable:false},
-  {date:'2026-05-14',time:'16:30-18:00',cat:'life',title:'Summer clothes sort Day 1',editable:false},
-  {date:'2026-05-14',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:false},
+  {date:'2026-05-14',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:true},
+  {date:'2026-05-14',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:true},
+  {date:'2026-05-14',time:'16:00-16:30',cat:'home',title:'Water plants + repot 30min',editable:true},
+  {date:'2026-05-14',time:'16:30-18:00',cat:'life',title:'Summer clothes sort Day 1',editable:true},
+  {date:'2026-05-14',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:true},
   {date:'2026-05-15',time:'09:00-13:00',cat:'work',title:'Part-time job',editable:true},
-  {date:'2026-05-15',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:false},
-  {date:'2026-05-15',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:false},
-  {date:'2026-05-15',time:'16:00-16:30',cat:'life',title:'Summer clothes sort Day 2',editable:false},
-  {date:'2026-05-15',time:'16:30-17:30',cat:'life',title:'Plan Claude Architect Cert + UGC study plan',editable:false},
-  {date:'2026-05-15',time:'17:30-18:00',cat:'home',title:'Cook dinner 30min',editable:false},
-  {date:'2026-05-15',time:'18:30-21:30',cat:'learn',title:'Simplilearn session 3hrs',editable:false},
+  {date:'2026-05-15',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:true},
+  {date:'2026-05-15',time:'15:00-15:45',cat:'health',title:'Workout 45min',editable:true},
+  {date:'2026-05-15',time:'16:00-16:30',cat:'life',title:'Summer clothes sort Day 2',editable:true},
+  {date:'2026-05-15',time:'16:30-17:30',cat:'life',title:'Plan Claude Architect Cert + UGC study plan',editable:true},
+  {date:'2026-05-15',time:'17:30-18:00',cat:'home',title:'Cook dinner 30min',editable:true},
+  {date:'2026-05-15',time:'18:30-21:30',cat:'learn',title:'Simplilearn session 3hrs',editable:true},
   {date:'2026-05-16',time:'09:00-13:00',cat:'work',title:'Part-time job',editable:true},
-  {date:'2026-05-16',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:false},
-  {date:'2026-05-16',time:'15:00-15:30',cat:'home',title:'Water plants + repot 30min',editable:false},
-  {date:'2026-05-16',time:'15:30-18:00',cat:'create',title:'Video editing W4/W5 content pipeline',editable:false},
-  {date:'2026-05-16',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:false},
-  {date:'2026-05-17',time:'09:00-10:00',cat:'home',title:'Breakfast cook 1hr',editable:false},
-  {date:'2026-05-17',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:false},
-  {date:'2026-05-17',time:'11:00-14:00',cat:'create',title:'Video editing W4/W5 content pipeline',editable:false},
-  {date:'2026-05-17',time:'15:00-16:00',cat:'home',title:'Cook big batch 1hr',editable:false},
-  {date:'2026-05-18',time:'09:00-10:00',cat:'home',title:'Breakfast cook 1hr',editable:false},
-  {date:'2026-05-18',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:false},
-  {date:'2026-05-18',time:'11:00-11:30',cat:'home',title:'Water plants + repot 30min',editable:false},
-  {date:'2026-05-18',time:'15:00-16:00',cat:'home',title:'Cook big batch 1hr',editable:false},
-  {date:'2026-05-18',time:'16:00-17:00',cat:'life',title:'Week review + next week plan',editable:false},
+  {date:'2026-05-16',time:'13:00-14:00',cat:'health',title:'Walk 1hr + commute rest',editable:true},
+  {date:'2026-05-16',time:'15:00-15:30',cat:'home',title:'Water plants + repot 30min',editable:true},
+  {date:'2026-05-16',time:'15:30-18:00',cat:'create',title:'Video editing W4/W5 content pipeline',editable:true},
+  {date:'2026-05-16',time:'18:00-18:30',cat:'home',title:'Cook dinner 30min',editable:true},
+  {date:'2026-05-17',time:'09:00-10:00',cat:'home',title:'Breakfast cook 1hr',editable:true},
+  {date:'2026-05-17',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:true},
+  {date:'2026-05-17',time:'11:00-14:00',cat:'create',title:'Video editing W4/W5 content pipeline',editable:true},
+  {date:'2026-05-17',time:'15:00-16:00',cat:'home',title:'Cook big batch 1hr',editable:true},
+  {date:'2026-05-18',time:'09:00-10:00',cat:'home',title:'Breakfast cook 1hr',editable:true},
+  {date:'2026-05-18',time:'10:00-11:00',cat:'health',title:'Walk 1hr',editable:true},
+  {date:'2026-05-18',time:'11:00-11:30',cat:'home',title:'Water plants + repot 30min',editable:true},
+  {date:'2026-05-18',time:'15:00-16:00',cat:'home',title:'Cook big batch 1hr',editable:true},
+  {date:'2026-05-18',time:'16:00-17:00',cat:'life',title:'Week review + next week plan',editable:true},
 ];
 const SEED_APPTS=[
   {date:'2026-05-09',title:'Son eye appointment',type:'family'},
@@ -922,8 +929,8 @@ const SEED_APPTS=[
 /* STATE */
 let todos=[],schedule=[],notes={},appts=[],lastSync='',lastPull='',nextId=1000,curDate='',curMon={y:2026,m:4},activeFilter='all',menuCtx=null,dirty=false,saveT=null;
 
-/* ── #1: active inline-edit state for time blocks ── */
-let editingBlock=null; // {date, origTime} — identifies which block is open for editing
+/* active inline-edit state for time blocks */
+let editingBlock=null; // {date, origTime}
 
 /* PERSIST */
 function markDirty(){
@@ -948,10 +955,7 @@ function load(){
       todos=d.todos||[];schedule=d.schedule||[];notes=d.notes||{};
       appts=d.appts||[];lastSync=d.lastSync||'';lastPull=d.lastPull||'';nextId=d.nextId||1000;
       curMon=d.curMon||{y:2026,m:4};
-      // Do NOT call mergeSeed() here — it resurrects deleted seed blocks on every load.
-      // Seed data is only injected on a genuine fresh install (no localStorage).
     } else {
-      // Genuine fresh install — seed everything
       todos=JSON.parse(JSON.stringify(SEED_T));
       schedule=JSON.parse(JSON.stringify(SEED_S));
     }
@@ -992,11 +996,7 @@ function goSec(id){
 function openDay(dateStr){ curDate=dateStr; goSec('day'); }
 function shiftDay(n){ curDate=shiftDate(curDate,n); editingBlock=null; renderDay(); document.getElementById('main').scrollTop=0; }
 
-/* ============================================================
-   MONTH — #4 FIX: skip local appts that have a gcalEventId
-   when GCal is connected (avoid double rendering).
-   Fall back to local render if GCal is disconnected.
-   ============================================================ */
+/* MONTH */
 function changeMonth(n){
   curMon.m+=n;
   if(curMon.m>11){ curMon.m=0; curMon.y++; }
@@ -1011,8 +1011,6 @@ function renderMonth(){
   const off=(firstDow===0)?6:firstDow-1;
   const dim=new Date(y,m+1,0).getDate();
 
-  // Build a Set of gcalEvent IDs that correspond to local appts
-  // so we know which local appts are already shown via GCal fetch
   const gcalSyncedIds = new Set(
     appts.filter(function(a){ return a.gcalEventId; }).map(function(a){ return a.gcalEventId; })
   );
@@ -1020,16 +1018,13 @@ function renderMonth(){
   const em={};
   function addEv(date,t,c){ if(!em[date])em[date]=[]; em[date].push({t:t,c:c}); }
 
-  // Seed appts — always show (they have no gcalEventId)
   SEED_APPTS.forEach(function(a){ addEv(a.date,a.title,a.type); });
 
-  // User appts: only show locally if NOT synced to GCal, OR if GCal is disconnected
   appts.forEach(function(a){
     const alreadyInGCal = gcalConnected && a.gcalEventId;
     if(!alreadyInGCal) addEv(a.date,a.title,a.type);
   });
 
-  // GCal events — always shown when connected (this covers the synced appts too)
   gcalEvents.forEach(function(e){ addEv(e.date,e.title,'gcal'); });
 
   todos.forEach(function(t){
@@ -1106,7 +1101,7 @@ function carryFwd(from,to){
 }
 
 /* ============================================================
-   TIME BLOCKS — #1: Edit + Delete for editable:true blocks
+   TIME BLOCKS — Edit + Delete with immediate Sheets sync (#2)
    ============================================================ */
 function renderTBs(){
   const blocks=schedule.filter(function(b){ return b.date===curDate; })
@@ -1146,29 +1141,21 @@ function renderTBs(){
       '</div>';
     }
 
-    // ── Normal read view ──
-    // Seeded blocks (editable:false) keep the old inline time-edit inputs for time only
-    const timeHtml = b.editable
-      ? '<div class="tb-time">'+b.time+'</div>'
-      : '<div style="display:flex;align-items:center;gap:3px;"><input class="tb-tinp" type="time" value="'+s+'" onchange="updBTime(\''+curDate+'\',\''+b.time+'\',\'s\',this.value)"><span class="tb-tsep">-</span><input class="tb-tinp" type="time" value="'+e+'" onchange="updBTime(\''+curDate+'\',\''+b.time+'\',\'e\',this.value)"></div>';
+    // ── Normal read view — Edit + Delete buttons for all blocks ──
+    const timeHtml = '<div class="tb-time">'+b.time+'</div>';
 
-    // Action buttons — only for editable:true blocks
-    const actionBtns = b.editable
-      ? '<div class="tb-actions">' +
-          '<button class="tb-action-btn tb-edit-btn" onclick="openBlockEdit(\''+b.date+'\',\''+b.time+'\')">Edit</button>' +
-          '<button class="tb-action-btn tb-del-btn" onclick="deleteBlock(\''+b.date+'\',\''+b.time+'\')">Delete</button>' +
-        '</div>'
-      : '';
+    const actionBtns = '<div class="tb-actions">' +
+      '<button class="tb-action-btn tb-edit-btn" title="Edit" onclick="openBlockEdit(\''+b.date+'\',\''+b.time+'\')">&#9998;</button>' +
+      '<button class="tb-action-btn tb-del-btn" title="Delete" onclick="deleteBlock(\''+b.date+'\',\''+b.time+'\')">&#128465;</button>' +
+    '</div>';
 
     return '<div class="tb '+b.cat+'">' +
       '<div class="tb-tcol">'+timeHtml+'</div>' +
-      '<div class="tb-body">' +
-        '<textarea class="tb-label" rows="1" '+
-          (b.editable ? '' : 'onblur="updBTitle(\''+curDate+'\',\''+b.time+'\',this.value)" ') +
-          'oninput="autoResize(this)" '+
-          (b.editable ? 'readonly style="cursor:default;" ' : '') +
-        '>'+escHtml(b.title)+'</textarea>' +
-        '<span class="tb-ctag">'+(CATS[b.cat]||b.cat)+'</span>' +
+      '<div class="tb-body" style="display:flex;align-items:flex-start;gap:4px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<textarea class="tb-label" rows="1" oninput="autoResize(this)" readonly style="cursor:default;">'+escHtml(b.title)+'</textarea>' +
+          '<span class="tb-ctag">'+(CATS[b.cat]||b.cat)+'</span>' +
+        '</div>' +
         actionBtns +
       '</div>' +
     '</div>';
@@ -1181,21 +1168,18 @@ function escHtml(s){
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* Open inline edit for a block */
 function openBlockEdit(date, origTime){
   editingBlock = {date:date, origTime:origTime};
-  closeABF(); // close add form if open
+  closeABF();
   renderTBs();
   setTimeout(function(){ const el=document.getElementById('tbe-t'); if(el) el.focus(); },40);
 }
 
-/* Cancel edit */
 function cancelBlockEdit(){
   editingBlock = null;
   renderTBs();
 }
 
-/* Save inline edit */
 function saveBlockEdit(date, origTime){
   const ns = document.getElementById('tbe-s') && document.getElementById('tbe-s').value;
   const ne = document.getElementById('tbe-e') && document.getElementById('tbe-e').value;
@@ -1211,21 +1195,50 @@ function saveBlockEdit(date, origTime){
   renderTBs();
   persist();
   toast('Block updated');
+  autoSyncBlock(); /* ── #2: write SC-Schedule to Sheets immediately ── */
 }
 
-/* Delete a block (editable:true only — guard enforced here too) */
 function deleteBlock(date, time){
-  const idx = schedule.findIndex(function(b){ return b.date===date && b.time===time && b.editable; });
-  if(idx===-1){ toast('Cannot delete a fixed block'); return; }
+  const idx = schedule.findIndex(function(b){ return b.date===date && b.time===time; });
+  if(idx===-1){ toast('Block not found'); return; }
   if(!confirm('Delete this time block?')) return;
   schedule.splice(idx,1);
   if(editingBlock && editingBlock.date===date && editingBlock.origTime===time) editingBlock=null;
   renderTBs();
   persist();
   toast('Block deleted');
+  autoSyncBlock(); /* ── #2: write SC-Schedule to Sheets immediately ── */
 }
 
-/* Legacy helpers — still used by non-editable (seeded) blocks */
+/* ── #2: Auto-sync SC-Schedule to Sheets after any edit or delete ──
+   If GCal not connected: marks dirty, shows informational toast.
+   If connected: writes the full schedule tab silently; flashes save-dot green on success. */
+async function autoSyncBlock(){
+  if(!gcalConnected || !gcalToken){
+    markDirty();
+    toast('Saved locally — connect Calendar to sync to Sheets');
+    return;
+  }
+  try {
+    await syncSchedule();
+    lastSync = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    persist();
+    // Brief green flash on save-dot to confirm Sheets write
+    const d = document.getElementById('save-dot');
+    if(d){
+      d.style.background = '#34a853';
+      setTimeout(function(){ d.style.background = ''; }, 1800);
+    }
+  } catch(err){
+    console.error('autoSyncBlock error:', err);
+    markDirty();
+    if(err.message && err.message.includes('401')){ handleTokenExpiry(); toast('Session expired - reconnect Calendar'); }
+    else { toast('Block saved locally — Sheets sync failed'); }
+  }
+}
+
+/* Legacy title/time edit helpers — kept for any blocks that may have been
+   saved before this build. No longer wired to the rendered UI. */
 function updBTitle(date,time,val){ const b=schedule.find(function(b){ return b.date===date&&b.time===time; }); if(b&&val.trim()){ b.title=val.trim(); persist(); } }
 function updBTime(date,oldT,which,val){
   const b=schedule.find(function(b){ return b.date===date&&b.time===oldT; }); if(!b) return;
@@ -1433,12 +1446,6 @@ function openSync(){
 }
 function closeSync(){ document.getElementById('sync-ov').classList.remove('open'); }
 
-/* ============================================================
-   PULL FROM SHEETS — #3: Read sheet tabs back into local state
-   Reads SC-Todos, SC-Schedule, SC-Appointments.
-   Overwrites local data. lastPull-wins semantics.
-   Requires GCal (same OAuth token used for Sheets API).
-   ============================================================ */
 async function pullFromSheets(){
   if(!gcalConnected || !gcalToken){ toast('Connect Google Calendar first'); return; }
   const pullBtn=document.getElementById('pull-now-btn');
@@ -1450,11 +1457,9 @@ async function pullFromSheets(){
       sheetsRead('SC-Appointments!A:J')
     ]);
 
-    // ── Parse Todos ──
-    // Columns: ID, Date, Task, Tag, Priority, State, PostponedTo, Notes, CarryFrom, LastUpdated
     const pulledTodos = [];
     (todoRows.slice(1)||[]).forEach(function(r){
-      if(!r[0]&&!r[2]) return; // skip blank rows
+      if(!r[0]&&!r[2]) return;
       pulledTodos.push({
         id:        r[0]||('p'+Date.now()+Math.random()),
         date:      r[1]||'',
@@ -1468,8 +1473,6 @@ async function pullFromSheets(){
       });
     });
 
-    // ── Parse Schedule ──
-    // Columns: Date, Time, Category, Title, Editable, LastUpdated
     const pulledSchedule = [];
     (schedRows.slice(1)||[]).forEach(function(r){
       if(!r[0]&&!r[3]) return;
@@ -1482,12 +1485,9 @@ async function pullFromSheets(){
       });
     });
 
-    // ── Parse Appointments ──
-    // Columns: ID, Date, Title, Type, Start, End, Guests, Notes, GCalEventID, LastUpdated
     const pulledAppts = [];
     (apptRows.slice(1)||[]).forEach(function(r){
       if(!r[0]&&!r[2]) return;
-      // Skip rows where id looks like a date (corrupted SEED_APPT rows from old syncs)
       const rid = String(r[0]||'');
       if(/^\d{4}-\d{2}-\d{2}$/.test(rid)) return;
       pulledAppts.push({
@@ -1504,21 +1504,16 @@ async function pullFromSheets(){
       });
     });
 
-    // Guard: if all three came back empty, something is wrong — don't wipe local data
     if(!pulledTodos.length && !pulledSchedule.length && !pulledAppts.length){
       toast('Sheet appears empty — pull cancelled to protect local data');
       if(pullBtn){ pullBtn.disabled=false; pullBtn.textContent='⬇ Pull from Sheets'; }
       return;
     }
 
-    // Overwrite state — Sheet is source of truth after a pull.
-    // Do NOT call mergeSeed() here: it would resurrect deleted seed blocks.
     todos    = pulledTodos;
     schedule = pulledSchedule;
     appts    = pulledAppts;
-    // notes stays local — not in Sheets yet
 
-    // Find highest numeric ID to prevent collisions
     const maxId = todos.concat(appts).reduce(function(mx, x){
       const n = parseInt((x.id||'').replace(/\D/g,''))||0;
       return n>mx?n:mx;
@@ -1528,12 +1523,10 @@ async function pullFromSheets(){
     lastPull = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     persist();
 
-    // Re-render everything
     renderMonth();
     renderAT();
     if(curDate) renderDay();
 
-    // Update modal display
     document.getElementById('pull-last').textContent = lastPull;
     if(pullBtn){ pullBtn.disabled=false; pullBtn.textContent='⬇ Pull from Sheets'; }
 
@@ -1607,9 +1600,6 @@ async function syncSchedule(){
 async function syncAppointments(){
   const rows=[['ID','Date','Title','Type','Start','End','Guests','Notes','GCalEventID','LastUpdated']];
   const now=new Date().toISOString();
-  // Only sync user-created appointments (have a proper id starting with 'u' or 'p').
-  // SEED_APPTS are display-only and must never be written to the sheet — they have
-  // no real id and corrupt the column mapping when pulled back.
   appts.forEach(function(a){
     if(!a.id || (!String(a.id).startsWith('u') && !String(a.id).startsWith('p'))) return;
     rows.push([a.id||'',a.date||'',a.title||'',a.type||'',a.start||'',a.end||'',a.guests||'',a.notes||'',a.gcalEventId||'',now]);
