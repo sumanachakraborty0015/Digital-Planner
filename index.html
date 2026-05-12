@@ -948,8 +948,10 @@ function load(){
       todos=d.todos||[];schedule=d.schedule||[];notes=d.notes||{};
       appts=d.appts||[];lastSync=d.lastSync||'';lastPull=d.lastPull||'';nextId=d.nextId||1000;
       curMon=d.curMon||{y:2026,m:4};
-      mergeSeed();
+      // Do NOT call mergeSeed() here — it resurrects deleted seed blocks on every load.
+      // Seed data is only injected on a genuine fresh install (no localStorage).
     } else {
+      // Genuine fresh install — seed everything
       todos=JSON.parse(JSON.stringify(SEED_T));
       schedule=JSON.parse(JSON.stringify(SEED_S));
     }
