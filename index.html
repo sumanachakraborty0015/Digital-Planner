@@ -1487,8 +1487,11 @@ async function pullFromSheets(){
     const pulledAppts = [];
     (apptRows.slice(1)||[]).forEach(function(r){
       if(!r[0]&&!r[2]) return;
+      // Skip rows where id looks like a date (corrupted SEED_APPT rows from old syncs)
+      const rid = String(r[0]||'');
+      if(/^\d{4}-\d{2}-\d{2}$/.test(rid)) return;
       pulledAppts.push({
-        id:         r[0]||('p'+Date.now()+Math.random()),
+        id:         rid||('p'+Date.now()+Math.random()),
         date:       r[1]||'',
         title:      r[2]||'',
         type:       r[3]||'life',
@@ -1604,7 +1607,13 @@ async function syncSchedule(){
 async function syncAppointments(){
   const rows=[['ID','Date','Title','Type','Start','End','Guests','Notes','GCalEventID','LastUpdated']];
   const now=new Date().toISOString();
-  appts.forEach(function(a){rows.push([a.id||'',a.date||'',a.title||'',a.type||'',a.start||'',a.end||'',a.guests||'',a.notes||'',a.gcalEventId||'',now]);});
+  // Only sync user-created appointments (have a proper id starting with 'u' or 'p').
+  // SEED_APPTS are display-only and must never be written to the sheet — they have
+  // no real id and corrupt the column mapping when pulled back.
+  appts.forEach(function(a){
+    if(!a.id || (!String(a.id).startsWith('u') && !String(a.id).startsWith('p'))) return;
+    rows.push([a.id||'',a.date||'',a.title||'',a.type||'',a.start||'',a.end||'',a.guests||'',a.notes||'',a.gcalEventId||'',now]);
+  });
   await sheetsRequest('SC-Appointments!A1:J'+(rows.length+1),rows);
 }
 
