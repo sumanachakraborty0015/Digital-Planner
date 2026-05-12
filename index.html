@@ -4,14 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SC Digital Planner</title>
-<!-- Google Identity Services — required for OAuth -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* ============================================================
-   SC_Digital_Planner_System — Phase 1 with Google Calendar OAuth
-   localStorage key: sc-digital-planner
-   Sheet ID: 12l31nhER2lOTUfcUm548sqvIUZydzdZk3pxL_iuIUoM
-   ============================================================ */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
   --bg:#f4f1eb;--bg2:#ffffff;--bg3:#ede9e1;--bg4:#e4dfd5;
@@ -35,7 +29,6 @@
 html,body{height:100%;overflow:hidden;background:var(--bg);}
 body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
 
-/* LAYOUT */
 .top-bar{position:fixed;top:0;left:0;right:0;height:var(--top-h);z-index:300;background:var(--ink);display:flex;align-items:center;justify-content:space-between;padding:0 1rem;box-shadow:0 2px 10px rgba(0,0,0,.2);}
 .top-title{color:#cce8dc;font-size:15px;font-weight:700;letter-spacing:.02em;line-height:1.15;}
 .top-sub{color:#7ab09a;font-size:10px;font-style:italic;}
@@ -49,7 +42,6 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
 
 .main{position:fixed;top:var(--top-h);bottom:var(--nav-h);left:0;right:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;background:var(--bg);}
 
-/* BOTTOM NAV */
 .bot-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--bg2);border-top:2px solid var(--border);display:flex;align-items:stretch;z-index:300;padding-bottom:env(safe-area-inset-bottom,0px);}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:700;color:var(--text3);cursor:pointer;border:none;background:transparent;letter-spacing:.03em;text-transform:uppercase;font-family:'Georgia',serif;-webkit-tap-highlight-color:transparent;transition:color .15s;}
 .nav-btn .ni{font-size:20px;line-height:1;display:block;}
@@ -87,11 +79,9 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
 .cal-legend{display:flex;flex-wrap:wrap;gap:5px;margin-top:.75rem;}
 .lc{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
 
-/* GCAL STATUS BANNER */
 .gcal-status-bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--gcal-bg);border:1px solid var(--gcal-border);border-radius:var(--radius-sm);margin-bottom:.5rem;font-size:11px;color:#1a3d6b;}
 .gcal-refresh-btn{font-size:11px;padding:3px 10px;border-radius:10px;background:var(--gcal-blue);color:#fff;border:none;cursor:pointer;font-family:inherit;margin-left:auto;white-space:nowrap;}
 
-/* GCAL DAY EVENTS */
 .gcal-event-block{border-radius:var(--radius-sm);padding:7px 10px;display:flex;align-items:flex-start;gap:8px;border-left:3px solid var(--gcal-blue);background:var(--gcal-bg);margin-bottom:5px;}
 .gcal-event-time{font-size:10px;font-weight:700;color:#1a3d6b;font-family:monospace;min-width:78px;flex-shrink:0;line-height:1.4;}
 .gcal-event-body{flex:1;min-width:0;}
@@ -144,6 +134,25 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
 .tb.family .tb-ctag{background:var(--col-family-b);}
 .tb.create .tb-ctag{background:var(--col-create-b);}
 .tb.life .tb-ctag{background:var(--col-life-b);}
+
+/* TB EDIT/DELETE ACTION BUTTONS */
+.tb-actions{display:flex;gap:4px;margin-top:5px;align-items:center;}
+.tb-action-btn{font-size:10px;padding:2px 8px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;line-height:1.5;}
+.tb-edit-btn{background:rgba(255,255,255,.6);color:var(--text2);}
+.tb-edit-btn:active{background:rgba(255,255,255,.9);}
+.tb-del-btn{background:rgba(224,48,48,.12);color:var(--col-urgent-b);}
+.tb-del-btn:active{background:rgba(224,48,48,.25);}
+
+/* INLINE EDIT FORM FOR TIME BLOCK */
+.tb-edit-form{background:var(--bg2);border:1px solid var(--ink-mid);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:.5rem;}
+.tb-edit-form .abf-r{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;}
+.tb-edit-form .abfi{flex:1;min-width:70px;border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 8px;font-size:12px;font-family:inherit;color:var(--text);background:var(--bg2);outline:none;}
+.tb-edit-form .abfi:focus{border-color:var(--ink-mid);}
+.tb-edit-form .abfs{border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 8px;font-size:12px;font-family:inherit;color:var(--text);background:var(--bg2);outline:none;-webkit-appearance:none;flex:1;min-width:80px;}
+.tb-edit-form .abf-btns{display:flex;gap:6px;}
+.tb-edit-form .abf-save{flex:1;padding:8px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-xs);font-size:12px;font-family:inherit;font-weight:700;cursor:pointer;}
+.tb-edit-form .abf-cancel{padding:8px 12px;background:var(--bg3);color:var(--text2);border:none;border-radius:var(--radius-xs);font-size:12px;font-family:inherit;cursor:pointer;}
+
 .add-block-row{display:flex;justify-content:flex-end;margin-bottom:.5rem;}
 .add-block-btn{font-size:11px;padding:4px 11px;border-radius:20px;border:1px dashed var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:inherit;}
 .abf{background:var(--bg2);border:1px solid var(--ink-mid);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:.5rem;display:none;}
@@ -320,7 +329,6 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
   <div class="loading-s">Loading your data...</div>
 </div>
 
-<!-- TOP BAR -->
 <div class="top-bar">
   <div>
     <div class="top-title">SC Digital Planner</div>
@@ -369,7 +377,6 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
     </div>
     <div id="day-carry"></div>
 
-    <!-- GOOGLE CALENDAR EVENTS — read from your calendar -->
     <div id="gcal-status-bar" class="gcal-status-bar" style="display:none;">
       <span id="gcal-status-text">&#128197; Google Calendar events</span>
       <button class="gcal-refresh-btn" onclick="fetchGCalEvents()">&#8635; Refresh</button>
@@ -427,7 +434,6 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
     </div>
     <div class="todo-list" id="day-todos"></div>
 
-    <!-- APPOINTMENT FORM -->
     <div class="sh">Appointments</div>
     <div class="appt-card">
       <div class="appt-card-title">&#128197; Add Appointment</div>
@@ -541,24 +547,23 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
   </div>
 </div>
 
-<!-- GOOGLE CALENDAR SETUP GUIDE -->
+<!-- SETUP GUIDE MODAL -->
 <div class="setup-ov" id="setup-ov" onclick="if(event.target===this)closeSetup()">
   <div class="setup-modal">
     <div class="setup-h">&#128197; Connect Google Calendar</div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.6;">One-time setup (~10 minutes). After this, every appointment you save in the planner is automatically created in Google Calendar.</p>
-
+    <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.6;">One-time setup (~10 minutes).</p>
     <div class="setup-step">
       <div class="setup-num">1</div>
       <div class="setup-step-body">
         <div class="setup-step-title">Go to Google Cloud Console</div>
-        <div class="setup-step-detail">Open <strong>console.cloud.google.com</strong> in a new tab. Sign in with your Google account.</div>
+        <div class="setup-step-detail">Open <strong>console.cloud.google.com</strong>. Sign in with your Google account.</div>
       </div>
     </div>
     <div class="setup-step">
       <div class="setup-num">2</div>
       <div class="setup-step-body">
         <div class="setup-step-title">Create a project</div>
-        <div class="setup-step-detail">Click the project dropdown at the top left &rarr; New Project &rarr; name it <span class="setup-code">SC-Digital-Planner</span> &rarr; Create.</div>
+        <div class="setup-step-detail">Project dropdown &rarr; New Project &rarr; name it <span class="setup-code">SC-Digital-Planner</span> &rarr; Create.</div>
       </div>
     </div>
     <div class="setup-step">
@@ -572,32 +577,26 @@ body{font-family:'Georgia',Georgia,serif;color:var(--text);font-size:14px;}
       <div class="setup-num">4</div>
       <div class="setup-step-body">
         <div class="setup-step-title">OAuth consent screen</div>
-        <div class="setup-step-detail">APIs &amp; Services &rarr; OAuth consent screen &rarr; External &rarr; fill in App name: <span class="setup-code">SC Planner</span>, your email &rarr; Save. Add yourself as a Test user.</div>
+        <div class="setup-step-detail">External &rarr; App name: <span class="setup-code">SC Planner</span> &rarr; Save. Add yourself as Test user.</div>
       </div>
     </div>
     <div class="setup-step">
       <div class="setup-num">5</div>
       <div class="setup-step-body">
         <div class="setup-step-title">Create OAuth credentials</div>
-        <div class="setup-step-detail">APIs &amp; Services &rarr; Credentials &rarr; Create Credentials &rarr; OAuth 2.0 Client ID &rarr; Type: <strong>Web application</strong>.<br><br>
-        Under "Authorised JavaScript origins" add:<br>
-        <span class="setup-code">http://localhost</span><br>
-        <span class="setup-code">null</span> (for file:// access on desktop)<br><br>
-        Click Create. Copy the <strong>Client ID</strong>.</div>
+        <div class="setup-step-detail">Credentials &rarr; OAuth 2.0 Client ID &rarr; Type: <strong>Web application</strong>. Copy the <strong>Client ID</strong>.</div>
       </div>
     </div>
     <div class="setup-step">
       <div class="setup-num">6</div>
       <div class="setup-step-body">
         <div class="setup-step-title">Paste your Client ID below</div>
-        <div class="setup-step-detail">It looks like: <span class="setup-code">123456789-abc.apps.googleusercontent.com</span></div>
         <div class="setup-inp-row">
           <input class="setup-inp" id="setup-client-id" type="text" placeholder="Paste Client ID here...">
           <button class="setup-inp-btn" onclick="saveClientId()">Save &amp; Connect</button>
         </div>
       </div>
     </div>
-
     <button class="setup-close" onclick="closeSetup()">Close</button>
   </div>
 </div>
@@ -628,11 +627,8 @@ let gcalConnected = false;
 let tokenClient = null;
 
 function saveClientId(){
-  const val = document.getElementById('setup-client-id')?.value.trim();
-  if(!val || !val.includes('.apps.googleusercontent.com')){
-    toast('Paste a valid Client ID ending in .apps.googleusercontent.com');
-    return;
-  }
+  const val = document.getElementById('setup-client-id')&&document.getElementById('setup-client-id').value.trim();
+  if(!val || !val.includes('.apps.googleusercontent.com')){ toast('Paste a valid Client ID'); return; }
   GCAL_CLIENT_ID = val;
   localStorage.setItem('sc-gcal-client-id', val);
   closeSetup();
@@ -641,7 +637,6 @@ function saveClientId(){
 
 function initGCalAuth(){
   if(typeof google === 'undefined' || !google.accounts || !GCAL_CLIENT_ID) return;
-  // Try to restore a valid saved token
   const saved = localStorage.getItem('sc-gcal-token');
   if(saved){
     try {
@@ -672,10 +667,7 @@ function initGCalAuth(){
 }
 
 function handleGCalAuth(){
-  if(!GCAL_CLIENT_ID){
-    openSetup();
-    return;
-  }
+  if(!GCAL_CLIENT_ID){ openSetup(); return; }
   if(gcalConnected){
     gcalToken = null; gcalConnected = false; gcalEvents = [];
     localStorage.removeItem('sc-gcal-token');
@@ -702,25 +694,17 @@ function setGCalConnected(val){
   gcalConnected = val;
   const btn = document.getElementById('gcal-btn');
   if(!btn) return;
-  if(val){
-    btn.textContent = 'Cal Connected';
-    btn.className = 'gcal-btn connected';
-  } else {
-    btn.textContent = 'Connect Cal';
-    btn.className = 'gcal-btn disconnected';
-  }
-  // Update appt save button label
+  if(val){ btn.textContent = 'Cal Connected'; btn.className = 'gcal-btn connected'; }
+  else { btn.textContent = 'Connect Cal'; btn.className = 'gcal-btn disconnected'; }
   const sb = document.getElementById('appt-save-btn');
   if(sb){
     sb.textContent = val ? 'Save + Add to Google Calendar' : 'Save to Planner (connect Cal to auto-add)';
     sb.className = val ? 'appt-save' : 'appt-save no-cal';
   }
-  // Show/hide gcal status bar in day view
   const bar = document.getElementById('gcal-status-bar');
   if(bar) bar.style.display = val ? 'flex' : 'none';
 }
 
-/* FETCH EVENTS FROM GOOGLE CALENDAR */
 async function fetchGCalEvents(){
   if(!gcalToken) return;
   const now = new Date();
@@ -767,7 +751,6 @@ function handleTokenExpiry(){
   toast('Calendar session expired - tap Connect Cal to refresh');
 }
 
-/* RENDER GCAL EVENTS IN DAY VIEW */
 function renderGCalDayEvents(){
   const c = document.getElementById('gcal-day-events');
   if(!c) return;
@@ -788,60 +771,44 @@ function renderGCalDayEvents(){
   }).join('');
 }
 
-/* CREATE EVENT IN GOOGLE CALENDAR */
 async function createGCalEvent(appt){
   if(!gcalToken || !gcalConnected) return null;
-  function toGCalDT(date, time){
-    return { dateTime: date + 'T' + time + ':00', timeZone: 'America/Chicago' };
-  }
+  function toGCalDT(date, time){ return { dateTime: date + 'T' + time + ':00', timeZone: 'America/Chicago' }; }
   const startDt = appt.start ? toGCalDT(appt.date, appt.start) : { date: appt.date };
   const endDt   = appt.end   ? toGCalDT(appt.date, appt.end)
                 : appt.start ? toGCalDT(appt.date, addHour(appt.start))
                 : { date: appt.date };
   const body = { summary: appt.title, start: startDt, end: endDt, description: appt.notes || '' };
   if(appt.guests && appt.guests.trim()){
-    body.attendees = appt.guests.split(',')
-      .map(function(e){ return { email: e.trim() }; })
-      .filter(function(e){ return e.email; });
+    body.attendees = appt.guests.split(',').map(function(e){ return { email: e.trim() }; }).filter(function(e){ return e.email; });
     body.guestsCanModify = false;
   }
   try {
     const resp = await fetch(
       'https://www.googleapis.com/calendar/v3/calendars/primary/events?sendUpdates=all',
-      {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + gcalToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      }
+      { method: 'POST', headers: { 'Authorization': 'Bearer ' + gcalToken, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
     );
     if(resp.status === 401){ handleTokenExpiry(); return null; }
     const data = await resp.json();
     await fetchGCalEvents();
     return data.id;
-  } catch(err){
-    console.error('GCal create error:', err);
-    return null;
-  }
+  } catch(err){ console.error('GCal create error:', err); return null; }
 }
 
-/* DELETE EVENT FROM GOOGLE CALENDAR */
 async function deleteGCalEvent(gcalEventId){
   if(!gcalToken || !gcalEventId) return;
   try {
-    await fetch(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events/' + gcalEventId,
-      { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + gcalToken } }
-    );
+    await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/' + gcalEventId,
+      { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + gcalToken } });
     await fetchGCalEvents();
   } catch(err){ console.error('GCal delete error:', err); }
 }
 
-/* SETUP GUIDE MODAL */
 function openSetup(){ document.getElementById('setup-ov').classList.add('open'); }
 function closeSetup(){ document.getElementById('setup-ov').classList.remove('open'); }
 
 /* ============================================================
-   SEED DATA (from SC-Todos + SC-Schedule in sheet)
+   SEED DATA
    ============================================================ */
 const SEED_T=[
   {id:'s1',date:'2026-05-06',task:'Order YesStyle K-Sunscreen - deadline today',tag:'Urgent',priority:'Urgent',state:'open',postponedTo:'',notes:'',carryFrom:''},
@@ -951,6 +918,9 @@ const SEED_APPTS=[
 /* STATE */
 let todos=[],schedule=[],notes={},appts=[],lastSync='',nextId=1000,curDate='',curMon={y:2026,m:4},activeFilter='all',menuCtx=null,dirty=false,saveT=null;
 
+/* ── #1: active inline-edit state for time blocks ── */
+let editingBlock=null; // {date, origTime} — identifies which block is open for editing
+
 /* PERSIST */
 function markDirty(){
   dirty=true;
@@ -1014,9 +984,13 @@ function goSec(id){
   if(id==='day') renderDay();
 }
 function openDay(dateStr){ curDate=dateStr; goSec('day'); }
-function shiftDay(n){ curDate=shiftDate(curDate,n); renderDay(); document.getElementById('main').scrollTop=0; }
+function shiftDay(n){ curDate=shiftDate(curDate,n); editingBlock=null; renderDay(); document.getElementById('main').scrollTop=0; }
 
-/* MONTH */
+/* ============================================================
+   MONTH — #4 FIX: skip local appts that have a gcalEventId
+   when GCal is connected (avoid double rendering).
+   Fall back to local render if GCal is disconnected.
+   ============================================================ */
 function changeMonth(n){
   curMon.m+=n;
   if(curMon.m>11){ curMon.m=0; curMon.y++; }
@@ -1030,15 +1004,32 @@ function renderMonth(){
   const firstDow=new Date(y,m,1).getDay();
   const off=(firstDow===0)?6:firstDow-1;
   const dim=new Date(y,m+1,0).getDate();
-  // Build event map from: seed appts + user appts + todos + gcal events
+
+  // Build a Set of gcalEvent IDs that correspond to local appts
+  // so we know which local appts are already shown via GCal fetch
+  const gcalSyncedIds = new Set(
+    appts.filter(function(a){ return a.gcalEventId; }).map(function(a){ return a.gcalEventId; })
+  );
+
   const em={};
   function addEv(date,t,c){ if(!em[date])em[date]=[]; em[date].push({t:t,c:c}); }
+
+  // Seed appts — always show (they have no gcalEventId)
   SEED_APPTS.forEach(function(a){ addEv(a.date,a.title,a.type); });
-  appts.forEach(function(a){ addEv(a.date,a.title,a.type); });
+
+  // User appts: only show locally if NOT synced to GCal, OR if GCal is disconnected
+  appts.forEach(function(a){
+    const alreadyInGCal = gcalConnected && a.gcalEventId;
+    if(!alreadyInGCal) addEv(a.date,a.title,a.type);
+  });
+
+  // GCal events — always shown when connected (this covers the synced appts too)
   gcalEvents.forEach(function(e){ addEv(e.date,e.title,'gcal'); });
+
   todos.forEach(function(t){
     if(t.state==='open'&&t.priority==='Urgent') addEv(t.date,t.task,'_urg');
   });
+
   let html='';
   for(let i=0;i<off;i++) html+='<div class="cal-day other"></div>';
   for(let d=1;d<=dim;d++){
@@ -1107,32 +1098,142 @@ function carryFwd(from,to){
   });
   renderDay(); persist(); toast(n+' task'+(n!==1?'s':'')+' carried forward');
 }
+
+/* ============================================================
+   TIME BLOCKS — #1: Edit + Delete for editable:true blocks
+   ============================================================ */
 function renderTBs(){
-  const blocks=schedule.filter(function(b){ return b.date===curDate; }).sort(function(a,b){ return a.time.localeCompare(b.time); });
+  const blocks=schedule.filter(function(b){ return b.date===curDate; })
+    .sort(function(a,b){ return a.time.localeCompare(b.time); });
   const c=document.getElementById('day-tbs');
-  if(!blocks.length){ c.innerHTML='<div style="font-size:12px;color:var(--text3);font-style:italic;padding:6px 0;">No blocks yet - tap + Add time block.</div>'; return; }
+  if(!blocks.length){
+    c.innerHTML='<div style="font-size:12px;color:var(--text3);font-style:italic;padding:6px 0;">No blocks yet - tap + Add time block.</div>';
+    return;
+  }
+
   c.innerHTML=blocks.map(function(b){
+    const isEditing = editingBlock && editingBlock.date===b.date && editingBlock.origTime===b.time;
     const parts=(b.time||'-').split('-');
     const s=parts[0]||'',e=parts[1]||'';
-    const timeHtml=b.editable
-      ?'<div style="display:flex;align-items:center;gap:3px;"><input class="tb-tinp" type="time" value="'+s+'" onchange="updBTime(\''+curDate+'\',\''+b.time+'\',\'s\',this.value)"><span class="tb-tsep">-</span><input class="tb-tinp" type="time" value="'+e+'" onchange="updBTime(\''+curDate+'\',\''+b.time+'\',\'e\',this.value)"></div>'
-      :'<div class="tb-time">'+b.time+'</div>';
-    return '<div class="tb '+b.cat+'"><div class="tb-tcol">'+timeHtml+'</div><div class="tb-body"><textarea class="tb-label" rows="1" onblur="updBTitle(\''+curDate+'\',\''+b.time+'\',this.value)" oninput="autoResize(this)">'+b.title+'</textarea><span class="tb-ctag">'+(CATS[b.cat]||b.cat)+'</span></div></div>';
+
+    // ── Inline edit form ──
+    if(isEditing){
+      return '<div class="tb-edit-form">' +
+        '<div style="font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px;">Edit time block</div>' +
+        '<div class="abf-r">' +
+          '<input class="abfi" id="tbe-s" type="time" value="'+s+'" style="flex:0 0 86px;">' +
+          '<span style="align-self:center;color:var(--text3);font-size:12px;">-</span>' +
+          '<input class="abfi" id="tbe-e" type="time" value="'+e+'" style="flex:0 0 86px;">' +
+          '<select class="abfs" id="tbe-c">' +
+            ['work','health','learn','home','care','family','create','life'].map(function(cat){
+              return '<option value="'+cat+'"'+(b.cat===cat?' selected':'')+'>'+CATS[cat]+'</option>';
+            }).join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="abf-r">' +
+          '<input class="abfi" id="tbe-t" type="text" value="'+escHtml(b.title)+'" placeholder="Block title..." style="flex:1;">' +
+        '</div>' +
+        '<div class="abf-btns">' +
+          '<button class="abf-save" onclick="saveBlockEdit(\''+b.date+'\',\''+b.time+'\')">Save changes</button>' +
+          '<button class="abf-cancel" onclick="cancelBlockEdit()">Cancel</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    // ── Normal read view ──
+    // Seeded blocks (editable:false) keep the old inline time-edit inputs for time only
+    const timeHtml = b.editable
+      ? '<div class="tb-time">'+b.time+'</div>'
+      : '<div style="display:flex;align-items:center;gap:3px;"><input class="tb-tinp" type="time" value="'+s+'" onchange="updBTime(\''+curDate+'\',\''+b.time+'\',\'s\',this.value)"><span class="tb-tsep">-</span><input class="tb-tinp" type="time" value="'+e+'" onchange="updBTime(\''+curDate+'\',\''+b.time+'\',\'e\',this.value)"></div>';
+
+    // Action buttons — only for editable:true blocks
+    const actionBtns = b.editable
+      ? '<div class="tb-actions">' +
+          '<button class="tb-action-btn tb-edit-btn" onclick="openBlockEdit(\''+b.date+'\',\''+b.time+'\')">Edit</button>' +
+          '<button class="tb-action-btn tb-del-btn" onclick="deleteBlock(\''+b.date+'\',\''+b.time+'\')">Delete</button>' +
+        '</div>'
+      : '';
+
+    return '<div class="tb '+b.cat+'">' +
+      '<div class="tb-tcol">'+timeHtml+'</div>' +
+      '<div class="tb-body">' +
+        '<textarea class="tb-label" rows="1" '+
+          (b.editable ? '' : 'onblur="updBTitle(\''+curDate+'\',\''+b.time+'\',this.value)" ') +
+          'oninput="autoResize(this)" '+
+          (b.editable ? 'readonly style="cursor:default;" ' : '') +
+        '>'+escHtml(b.title)+'</textarea>' +
+        '<span class="tb-ctag">'+(CATS[b.cat]||b.cat)+'</span>' +
+        actionBtns +
+      '</div>' +
+    '</div>';
   }).join('');
+
+  setTimeout(function(){ document.querySelectorAll('.tb-label').forEach(function(el){ autoResize(el); }); },40);
 }
+
+function escHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* Open inline edit for a block */
+function openBlockEdit(date, origTime){
+  editingBlock = {date:date, origTime:origTime};
+  closeABF(); // close add form if open
+  renderTBs();
+  setTimeout(function(){ const el=document.getElementById('tbe-t'); if(el) el.focus(); },40);
+}
+
+/* Cancel edit */
+function cancelBlockEdit(){
+  editingBlock = null;
+  renderTBs();
+}
+
+/* Save inline edit */
+function saveBlockEdit(date, origTime){
+  const ns = document.getElementById('tbe-s') && document.getElementById('tbe-s').value;
+  const ne = document.getElementById('tbe-e') && document.getElementById('tbe-e').value;
+  const nc = document.getElementById('tbe-c') && document.getElementById('tbe-c').value;
+  const nt = document.getElementById('tbe-t') && document.getElementById('tbe-t').value.trim();
+  if(!nt || !ns || !ne){ toast('Fill all fields'); return; }
+  const b = schedule.find(function(b){ return b.date===date && b.time===origTime; });
+  if(!b){ toast('Block not found'); editingBlock=null; renderTBs(); return; }
+  b.time = ns+'-'+ne;
+  b.cat  = nc;
+  b.title= nt;
+  editingBlock = null;
+  renderTBs();
+  persist();
+  toast('Block updated');
+}
+
+/* Delete a block (editable:true only — guard enforced here too) */
+function deleteBlock(date, time){
+  const idx = schedule.findIndex(function(b){ return b.date===date && b.time===time && b.editable; });
+  if(idx===-1){ toast('Cannot delete a fixed block'); return; }
+  if(!confirm('Delete this time block?')) return;
+  schedule.splice(idx,1);
+  if(editingBlock && editingBlock.date===date && editingBlock.origTime===time) editingBlock=null;
+  renderTBs();
+  persist();
+  toast('Block deleted');
+}
+
+/* Legacy helpers — still used by non-editable (seeded) blocks */
 function updBTitle(date,time,val){ const b=schedule.find(function(b){ return b.date===date&&b.time===time; }); if(b&&val.trim()){ b.title=val.trim(); persist(); } }
 function updBTime(date,oldT,which,val){
   const b=schedule.find(function(b){ return b.date===date&&b.time===oldT; }); if(!b) return;
   const p=b.time.split('-'); if(which==='s') p[0]=val; else p[1]=val;
   b.time=p.join('-'); persist(); renderTBs();
 }
-function toggleABF(){ const f=document.getElementById('abf'); f.classList.toggle('open'); if(f.classList.contains('open')) document.getElementById('abf-t').focus(); }
+
+function toggleABF(){ const f=document.getElementById('abf'); f.classList.toggle('open'); if(f.classList.contains('open')){ editingBlock=null; renderTBs(); document.getElementById('abf-t').focus(); } }
 function closeABF(){ document.getElementById('abf').classList.remove('open'); }
 function saveABF(){
   const s=document.getElementById('abf-s').value,e=document.getElementById('abf-e').value;
   const c=document.getElementById('abf-c').value,t=document.getElementById('abf-t').value.trim();
   if(!t||!s||!e){ toast('Fill all fields'); return; }
-  schedule.push({date:curDate,time:s+'-'+e,cat:c,title:t,editable:false});
+  schedule.push({date:curDate,time:s+'-'+e,cat:c,title:t,editable:true});
   document.getElementById('abf-t').value=''; closeABF(); renderTBs(); persist(); toast('Block added');
 }
 
@@ -1176,15 +1277,13 @@ async function saveAppt(){
   const start=document.getElementById('appt-start').value;
   const end=document.getElementById('appt-end').value;
   const guests=document.getElementById('appt-guests').value.trim();
-  const notes=document.getElementById('appt-notes-field').value.trim();
+  const apptNotes=document.getElementById('appt-notes-field').value.trim();
   if(!title){ toast('Enter an appointment title'); return; }
   if(!date){ toast('Pick a date'); return; }
-  const appt={id:uid(),date:date,title:title,type:type,start:start,end:end,guests:guests,notes:notes,gcalEventId:null,gcalSynced:false};
+  const appt={id:uid(),date:date,title:title,type:type,start:start,end:end,guests:guests,notes:apptNotes,gcalEventId:null,gcalSynced:false};
   appts.push(appt);
-  // Clear form immediately
   ['appt-title','appt-guests','appt-notes-field','appt-start','appt-end'].forEach(function(id){ const el=document.getElementById(id); if(el) el.value=''; });
   renderDayAppts(); persist();
-  // Auto-create in Google Calendar if connected
   if(gcalConnected){
     toast('Saving to Google Calendar...', 1500);
     const gcalId=await createGCalEvent(appt);
@@ -1202,9 +1301,7 @@ async function saveAppt(){
 }
 async function rmAppt(id){
   const appt=appts.find(function(a){ return a.id===id; });
-  if(appt&&appt.gcalEventId&&gcalConnected){
-    await deleteGCalEvent(appt.gcalEventId);
-  }
+  if(appt&&appt.gcalEventId&&gcalConnected){ await deleteGCalEvent(appt.gcalEventId); }
   appts=appts.filter(function(a){ return a.id!==id; });
   renderDayAppts(); persist(); toast('Removed');
 }
@@ -1311,7 +1408,7 @@ function renderAT(){
   c.innerHTML=html;
 }
 
-/* SYNC - Google Sheets write */
+/* SYNC */
 const SHEET_ID = '12l31nhER2lOTUfcUm548sqvIUZydzdZk3pxL_iuIUoM';
 
 function openSync(){
@@ -1384,13 +1481,11 @@ function init(){
   load();
   const now=new Date();
   if(!localStorage.getItem('sc-digital-planner')) curMon={y:now.getFullYear(),m:now.getMonth()};
-  // Restore client ID and try auto-connect
-  GCAL_CLIENT_ID=localStorage.getItem('sc-gcal-client-id')||'';
+  GCAL_CLIENT_ID=localStorage.getItem('sc-gcal-client-id')||'892720926492-j6fdpbd60jmn2kor65r4uo4do1sg47gm.apps.googleusercontent.com';
   renderMonth();
   document.getElementById('qa-date').value=today();
   document.getElementById('loading').style.display='none';
   toast('SC Digital Planner ready',2500);
-  // Try to auto-restore Google Calendar connection after GIS loads
   if(GCAL_CLIENT_ID){
     setTimeout(function(){ initGCalAuth(); },1500);
   }
